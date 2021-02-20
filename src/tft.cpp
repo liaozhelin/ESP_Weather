@@ -1,5 +1,5 @@
 #include "tft.h"
-#include "logo.h"
+
 
 typedef struct{
 	struct{
@@ -153,6 +153,23 @@ void ICACHE_FLASH_ATTR tft_show_logo(void)
 	}
 }
 
+void ICACHE_FLASH_ATTR tft_show_bmp(u16 x1,u16 y1,u8 size,u8 *BMP)
+{
+	int i;
+	u16 x, y;
+	i = 0;
+	for (x = 0; x < size; x++)
+	{
+		for (y = 0; y < size; y++)
+		{
+			//gImage_logo[i * 2] * 256 + gImage_logo[i * 2 + 1]);
+			lcd_draw_point(x + x1, y + y1,
+						   (*(BMP + (i * 2))) * 256 + *(BMP + (i * 2) + 1));
+			i++;
+		}
+	}
+}
+
 void tft_drawLine(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 {
 	u16 t;
@@ -286,7 +303,7 @@ void ICACHE_FLASH_ATTR tft_init(void)
 
 	tft_clear(0xff);
 	tft_show_logo();
-
+	
 }
 
 /*
@@ -369,6 +386,7 @@ void Show_Font(u16 x, u16 y, char *font, u8 size, u16 color)
 		}
 	}
 }
+*/
 void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 {
 	u8 temp;
@@ -384,7 +402,7 @@ void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 	{
 		if (size == 8)
 		{
-			temp = font5x8[chrx][pos];
+			//temp = font5x8[chrx][pos];
 			j = 5;
 		}
 		else if (size == 12)
@@ -402,7 +420,7 @@ void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 			temp = font16x32[chrx][pos * 2];
 			for (t = 0; t < 8; t++)
 			{
-				if (temp & 0x80)
+				if (temp & 0x01)
 				{
 					lcd_draw_point(x, y, color);
 				}
@@ -410,7 +428,7 @@ void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 				{
 					lcd_draw_point(x, y, 0);
 				}
-				temp <<= 1;
+				temp >>= 1;
 				x++;
 			}
 			temp = font16x32[chrx][pos * 2 + 1];
@@ -418,7 +436,7 @@ void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 		}
 		for (t = 0; t < j; t++)
 		{
-			if (temp & 0x80)
+			if (temp & 0x01)
 			{
 				lcd_draw_point(x, y, color);
 			}
@@ -426,13 +444,14 @@ void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 			{
 				lcd_draw_point(x, y, 0);
 			}
-			temp <<= 1;
+			temp >>= 1;
 			x++;
 		}
 		x = x0;
 		y++;
 	}
 }
+
 void lcd_show_string(u16 x, u16 y, u8 size, char *str, u16 color)
 {
 	u8 Width;
@@ -476,7 +495,7 @@ void lcd_show_string(u16 x, u16 y, u8 size, char *str, u16 color)
 		else
 		{
 			bHz = 0;
-			Show_Font(x, y, str, size, color);
+			//Show_Font(x, y, str, size, color);
 			str += 2;
 			x += size;
 			if (x > (240 - size))
@@ -487,12 +506,14 @@ void lcd_show_string(u16 x, u16 y, u8 size, char *str, u16 color)
 		}
 	}
 }
+
 void lcd_show_num(u16 x, u16 y, u8 size, int num, u16 color)
 {
 	char buf[10];
-	cs_itoa(num, buf, 10);
+	itoa(num, buf, 10);
 	lcd_show_string(x, y, size, buf, color);
 }
+
 void lcd_printf(u16 x, u16 y, u16 size, u16 color, char *fmt, ...)
 {
 	char buf[128];
@@ -502,6 +523,7 @@ void lcd_printf(u16 x, u16 y, u16 size, u16 color, char *fmt, ...)
 	va_end(args);
 	lcd_show_string(x, y, size, buf, color);
 }
+/*
 void tftdis_icon(u16 x, u16 y, u16 size, u32 addr)
 {
 	u8 buf[288];
