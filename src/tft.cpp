@@ -1,14 +1,7 @@
 #include "tft.h"
 
-
-typedef struct{
-	struct{
-		u8 Dir;
-	}Config;
-}SYS;
-
-//
 SYS Sys;
+
 SPIClass HSPI;
 
 void ICACHE_FLASH_ATTR tft_write_cmd(unsigned char cmd)
@@ -65,6 +58,7 @@ void ICACHE_FLASH_ATTR tft_clear_color(u32 Color)
 		}
 	}
 }
+/*
 void ICACHE_FLASH_ATTR tft_show_frame1(int index)
 {
 	int i, j;
@@ -91,7 +85,7 @@ void ICACHE_FLASH_ATTR tft_show_frame1(int index)
 		}
 	}
 }
-/*
+
 void ICACHE_FLASH_ATTR tft_show_frame(void)
 {
 	int i, j;
@@ -111,7 +105,7 @@ void ICACHE_FLASH_ATTR tft_show_frame(void)
 	}
 }
 */
-void lcd_draw_point(u16 x, u16 y, u16 color)
+void ICACHE_FLASH_ATTR lcd_draw_point(u16 x, u16 y, u16 color)
 {
 	u16 z;
 	if (Sys.Config.Dir == 1)
@@ -170,19 +164,19 @@ void ICACHE_FLASH_ATTR tft_show_bmp(u16 x1,u16 y1,u8 size,u8 *BMP)
 	}
 }
 
-void tft_drawLine(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
+void ICACHE_FLASH_ATTR tft_drawLine(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 {
 	u16 t;
 	int xerr = 0, yerr = 0, delta_x, delta_y, distance;
 	int incx, incy, uRow, uCol;
-	delta_x = x2 - x1; //������������
+	delta_x = x2 - x1; 
 	delta_y = y2 - y1;
 	uRow = x1;
 	uCol = y1;
 	if (delta_x > 0)
-		incx = 1; //���õ�������
+		incx = 1; 
 	else if (delta_x == 0)
-		incx = 0; //��ֱ��
+		incx = 0; 
 	else
 	{
 		incx = -1;
@@ -191,17 +185,17 @@ void tft_drawLine(u16 x1, u16 y1, u16 x2, u16 y2, u16 color)
 	if (delta_y > 0)
 		incy = 1;
 	else if (delta_y == 0)
-		incy = 0; //ˮƽ��
+		incy = 0; 
 	else
 	{
 		incy = -1;
 		delta_y = -delta_y;
 	}
 	if (delta_x > delta_y)
-		distance = delta_x; //ѡȡ��������������
+		distance = delta_x; 
 	else
 		distance = delta_y;
-	for (t = 0; t <= distance + 1; t++) //�������
+	for (t = 0; t <= distance + 1; t++) 
 	{
 		lcd_draw_point(uRow, uCol, color);
 		xerr += delta_x;
@@ -303,10 +297,11 @@ void ICACHE_FLASH_ATTR tft_init(void)
 
 	tft_clear(0xff);
 	tft_show_logo();
+
 	
 }
 
-/*
+
 void tftfonthz(char *code, unsigned char *mat, u8 size)
 {
 	unsigned char qh, ql;
@@ -339,16 +334,13 @@ void tftfonthz(char *code, unsigned char *mat, u8 size)
 	switch (size)
 	{
 	case 12:
-		spi_flash_read(0x100000 + foffset + Sys.FontInfo.Addr12, (u32*) mat,
-		csize);
+		spi_flash_read(0x100000 + foffset + Sys.FontInfo.Addr12, (u32*) mat,csize);
 		break;
 	case 16:
-		spi_flash_read(0x100000 + foffset + Sys.FontInfo.Addr16, (u32*) mat,
-		csize);
+		spi_flash_read(0x100000 + foffset + Sys.FontInfo.Addr16, (u32*) mat,csize);
 		break;
 	case 32:
-		spi_flash_read(0x100000 + foffset + Sys.FontInfo.Addr32, (u32*) mat,
-		csize);
+		spi_flash_read(0x100000 + foffset + Sys.FontInfo.Addr32, (u32*) mat,csize);
 		break;
 	}
 }
@@ -386,8 +378,8 @@ void Show_Font(u16 x, u16 y, char *font, u8 size, u16 color)
 		}
 	}
 }
-*/
-void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
+
+void ICACHE_FLASH_ATTR lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 {
 	u8 temp;
 	u8 j;
@@ -452,7 +444,7 @@ void lcd_show_char(u16 x, u16 y, u8 size, u8 chrx, u16 color)
 	}
 }
 
-void lcd_show_string(u16 x, u16 y, u8 size, char *str, u16 color)
+void ICACHE_FLASH_ATTR lcd_show_string(u16 x, u16 y, u8 size, char *str, u16 color)
 {
 	u8 Width;
 	u8 bHz = 0;
@@ -507,14 +499,14 @@ void lcd_show_string(u16 x, u16 y, u8 size, char *str, u16 color)
 	}
 }
 
-void lcd_show_num(u16 x, u16 y, u8 size, int num, u16 color)
+void ICACHE_FLASH_ATTR lcd_show_num(u16 x, u16 y, u8 size, int num, u16 color)
 {
 	char buf[10];
 	itoa(num, buf, 10);
 	lcd_show_string(x, y, size, buf, color);
 }
 
-void lcd_printf(u16 x, u16 y, u16 size, u16 color, char *fmt, ...)
+void ICACHE_FLASH_ATTR lcd_printf(u16 x, u16 y, u16 size, u16 color, char *fmt, ...)
 {
 	char buf[128];
 	va_list args;

@@ -1,10 +1,8 @@
-#include <Arduino.h>
-#include "ESP8266WiFi.h"
-#include <ArduinoJson.h>
-#include "tft.h"
+#include "include.h"
 
-const unsigned long BAUD_RATE = 9600;                   // serial connection speed
-const char* ssid="501 Master 2.4Ghz";
+
+const unsigned long BAUD_RATE = 115200;                   // serial connection speed
+const char* ssid="23333";
 const char* password="1999052912";
 const char *buf = "hello world";
 /*
@@ -26,28 +24,95 @@ void spi_lcd_9bit_write(uint8 spi_no,uint8 high_bit,uint8 low_8bit)
 	SET_PERI_REG_MASK(SPI_CMD(spi_no), SPI_USR);		//transmission start
 }
 */
+    
+
 void setup() {
+  u32 data[512];
+  int i,j;
+  int k;
+  //uint8_t *p = &gImage_CLOUD_2[0];
   Serial.begin(BAUD_RATE);
   tft_init();
   WiFi.mode(WIFI_STA);
-  while (WiFi.status() != WL_CONNECTED){
-     delay(100);
+  //WiFi.begin(ssid, password);
+  
+  //while (WiFi.status() != WL_CONNECTED){
+    //lcd_printf(0,176,32,0XF800,"initing-wifi");
+    //delay(100);
+  //}
+
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  
+  //LittleFS.format();
+  while (LittleFS.begin()!= true){
+    lcd_printf(0,208,32,0XF800,"initing-spiffs");
+    delay(100);
   }
+
   tft_clear(0x00);
+/*
+  Serial.println("Mount LittleFS");
+  listDir("/");
+  Serial.printf("Reading file: %s\n", "/12.FON");
   
-  tft_show_bmp(0, 112, 64, (uint8_t*)gImage_CLOUD_1);
-  tft_show_bmp(0, 176, 64, (uint8_t*)gImage_CLOUD_2);
-  tft_show_bmp(64, 112, 64, (uint8_t*)gImage_RAIN_1);
-  tft_show_bmp(64, 176, 64, (uint8_t*)gImage_RAIN_2);
+  File file = LittleFS.open("/12.FON", "r");
+  if (!file) {
+    Serial.println("Failed to open file for reading");
+    return;
+  }
+  if(file.seek(500,SeekSet)){
+     Serial.println("OK");
+  }
+  Serial.print("Read from file: ");
+  file.close();
   
-  //tft_show_bmp(128, 112, 64, (uint8_t*)gImage_RAIN_3);
-  //tft_show_bmp(128, 176, 64, (uint8_t*)gImage_RAIN_4);
-  //wdt_enable(10000);
-  //wdt_reset();
-  //const uint32_t mask = ~((SPIMMOSI << SPILMOSI) | (SPIMMISO << SPILMISO));
-  //SPI1U1 = ((SPI1U1 & mask) | ((8 << SPILMOSI) | (8 << SPILMISO)));
-  //tft_init();
+*/
+
+  Serial.print("Read from FLASH: ");
+  delay(500);
+  wdt_disable();
+  for (k = 0; k < 16;k++){
+      spi_flash_read(0X100000+(0X4000*k), data, 512);
+      for (i = 0; i < 512;i++){
+      for (j = 3; j >=0;j--){
+        Serial.write(data[i]>>(4*j));
+      }
+    }
+  }
+  wdt_enable(500);
+  /*
+  for (j = 0; j < 512;j++){
+      Serial.write(data[i]);
+  }
+  */  
   
+  // spi_flash_read(0X100000,data,64);
+
+  // for (i = 0; i < 16;i++){
+  //     spi_flash_read(0X100000+(1024*4*i),data,64);
+  //     for (j = 0; j < 512;j++)
+  //       Serial.write(data[i]);
+  //     delay(10);
+  // }
+  
+
+    /*
+
+  for (i = 0; i < 512;i++){
+    Serial.printf("%x", data[i]);
+  }
+  for (i = 0; i < 512;i++){
+      spi_flash_read(0X100000+(0X4000*i),data,512);
+      Serial.printf("%x", data[i]);
+  }
+    
+*/
+
+  // tft_show_bmp(0, 112, 64, (uint8_t*)gImage_RAIN_THU_1);
+  // tft_show_bmp(0, 176, 64, (uint8_t*)gImage_RAIN_THU_2);
+  // tft_show_bmp(64, 112, 64, (uint8_t*)gImage_WIND_1);
+  // tft_show_bmp(64, 176, 64, (uint8_t*)gImage_WIND_3);
   // put your setup code here, to run once:
 }
 
@@ -57,13 +122,7 @@ void loop() {
   lcd_show_string(0, 12, 16, (char *)buf, 0Xffff);
   lcd_show_num(0, 28, 32,i, 0Xffff);
   lcd_show_string(0, 60, 32, (char *)buf, 0Xffff);
-
-
-
-
-  //lcd_printf(0,60,32,0Xffff,"HELLO WORLD");
   i = (i<65535?i+1:0);
-
   /*
   u8 i;
   wdt_disable();
@@ -80,7 +139,6 @@ void loop() {
   wdt_enable(65535);
   tft_clear(0x00);
   */
-
   //tft_clear_color(0xF81F);
   // reset to 8Bit mode
   //lcd_draw_point(20,20,0xffea);
